@@ -3,8 +3,6 @@
         Jared Scott
         
     A script used to convert the .svg files from a PhysiCell simulation into .png files 
-
-    Place this in the same directory as the .svg files
 '''
 from cairosvg import svg2png
 import os
