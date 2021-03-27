@@ -1,3 +1,9 @@
+'''
+    Authors:
+        Jared Scott
+        
+    A script used to access and interact with the data from a PhysiCell simulaiton. 
+'''
 import sys
 from Parser import Parser
 

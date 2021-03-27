@@ -1,3 +1,12 @@
+'''
+    Authors:
+        Jared Scott, Braysen Goodwin
+        
+    This Parser class was made to parse the data from PhysiCell Simulations. 
+    This parser relies on both the .xml and .mat files from each step in the time series 
+    in order to produce a single object containing all available data values stored in 
+    the from of a scipy array for access and manipulation. 
+'''
 import xml.etree.ElementTree as ET
 from os import path
 import scipy.io
