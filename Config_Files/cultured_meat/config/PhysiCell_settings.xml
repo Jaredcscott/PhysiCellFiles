@@ -87,7 +87,7 @@
 	</domain>
 	
 	<overall>
-		<max_time units="min">64800</max_time> <!-- 5 days * 24 h * 60 min -->
+		<max_time units="min">1800</max_time> <!-- 5 days * 24 h * 60 min -->
 		<time_units>min</time_units>
 		<space_units>micron</space_units>
 	
@@ -128,12 +128,23 @@
 				<diffusion_coefficient units="micron^2/min">100000.00</diffusion_coefficient>
 				<decay_rate units="1/min">.1</decay_rate>  
 			</physical_parameter_set>
-			<initial_condition units="mmHg">38.0</initial_condition>
+			<initial_condition units="mmHg">250.0</initial_condition><!--Adjustable-->
 			<Dirichlet_boundary_condition units="mmHg" enabled="true">38.0</Dirichlet_boundary_condition>
+		</variable>
+
+		<!-- Using director signal to mimic nutirent delivery -->
+		<variable name="director signal" units="dimensionless" ID="0">
+			<physical_parameter_set>
+				<diffusion_coefficient units="micron^2/min">1000</diffusion_coefficient>
+				<decay_rate units="1/min">.1</decay_rate> <!-- 1 for cells  --> 
+			</physical_parameter_set>
+			<initial_condition units="dimensionless">0</initial_condition><!--Adjustable-->
+			<Dirichlet_boundary_condition units="dimensionless" enabled="false">1</Dirichlet_boundary_condition>
 		</variable>
 		
 		<options>
-			<calculate_gradients>false</calculate_gradients>
+			<!-- Calculating gradients is needed for the nutrient delivery-->
+			<calculate_gradients>true</calculate_gradients>
 			<track_internalized_substrates_in_each_agent>false</track_internalized_substrates_in_each_agent>
 			<!-- not yet supported --> 
 			<initial_condition type="matlab" enabled="false">
@@ -147,12 +158,19 @@
 	</microenvironment_setup>		
 	
 	<user_parameters>
-		<tumor_radius type="double" units="micron">250.0</tumor_radius>
+		<!-- using the tumor growth parameters to mimic muscle cells -->
+		<tumor_radius type="double" units="micron">350.0</tumor_radius><!--Adjustable-->
 		<oncoprotein_mean type="double" units="dimensionless">1.0</oncoprotein_mean>
 		<oncoprotein_sd type="double" units="dimensionless">0.25</oncoprotein_sd>
 		<oncoprotein_min type="double" units="dimensionless">0.0</oncoprotein_min>
 		<oncoprotein_max type="double" units="dimensionless">2</oncoprotein_max>
 		<random_seed type="int" units="dimensionless">0</random_seed>
+		<!-- Adding in director signal parameters-->
+		<director_signal_D type="double" units="micron/min^2">1e3</director_signal_D>
+		<director_signal_decay type="double" units="1/min">.1</director_signal_decay> <!-- 100 micron length scale -->
+		<number_of_directors type="int" units="none">1</number_of_directors><!--Adjustable-->
+		<director_color type="string" units="none">limegreen</director_color>	
 	</user_parameters>
 	
 </PhysiCell_settings>
+
