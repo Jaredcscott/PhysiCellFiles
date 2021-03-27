@@ -1,4 +1,0 @@
-If you refer to PhysiCell_constants.h line 136, 146 - 151 the cell phase can be used to determine if the cell is alive and healthy. 
-we can loop through the cells, look at the phase, if the phase is 14, then we can add its total volume to the sum of viable bio mass. 
-
-Then the agent can compare the total viable biomass and the inputs which generated it against other episodes. 
