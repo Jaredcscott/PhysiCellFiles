@@ -1,3 +1,5 @@
+Add this to the main make file where the other sample projects are located. 
+
 cultured-meat:
 	cp ./sample_projects/cultured_meat/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
