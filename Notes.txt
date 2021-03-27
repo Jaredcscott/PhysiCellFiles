@@ -3,9 +3,12 @@ we can loop through the cells, look at the phase, if the phase is 14, then we ca
 
 Then the agent can compare the total viable biomass and the inputs which generated it against other episodes. 
 
-wihtin the config .xml there are (to me) 4 adjustable values for our agent. 
-1) enviornment oxygen initial condition 
-2) nutrient package intial condition
-3) starting radius (number of starting cells) 
+within the config .xml there are (to me) 4 adjustable values for our agent. 
+1) environment oxygen initial condition
+
+2) nutrient package initial condition
+
+3) starting radius (number of starting cells)
+
 4) number of nutrient delivery cells
 
