@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
 ###############################################################################
 # If you use PhysiCell in your project, please cite PhysiCell and the version #
@@ -66,110 +64,27 @@
 #                                                                             #
 ###############################################################################
 */
---> 
 
-<!--
-<user_details />
--->
+#include "../core/PhysiCell.h"
+#include "../modules/PhysiCell_standard_modules.h" 
 
-<PhysiCell_settings version="devel-version">
-	<domain>
-		<x_min>-1000</x_min>
-		<x_max>1000</x_max>
-		<y_min>-1000</y_min>
-		<y_max>1000</y_max>
-		<z_min>-10</z_min>
-		<z_max>10</z_max>
-		<dx>20</dx>
-		<dy>20</dy>
-		<dz>20</dz>
-		<use_2D>true</use_2D>
-	</domain>
-	
-	<overall>
-		<max_time units="min">1800</max_time> 
-		<time_units>min</time_units>
-		<space_units>micron</space_units>
-	
-		<dt_diffusion units="min">0.01</dt_diffusion>
-		<dt_mechanics units="min">0.1</dt_mechanics>
-		<dt_phenotype units="min">6</dt_phenotype>	
-	</overall>
-	
-	<parallel>
-		<omp_num_threads>4</omp_num_threads>
-	</parallel> 
-	
-	<save>
-		<folder>output</folder> <!-- use . for root --> 
+using namespace BioFVM; 
+using namespace PhysiCell;
 
-		<full_data>
-			<interval units="min">60</interval>
-			<enable>true</enable>
-		</full_data>
-		
-		<SVG>
-			<interval units="min">60</interval>
-			<enable>true</enable>
-		</SVG>
-		
-		<legacy_data>
-			<enable>false</enable>
-		</legacy_data>
-	</save>
-	
-	<options>
-		<legacy_random_points_on_sphere_in_divide>false</legacy_random_points_on_sphere_in_divide>
-	</options>	
+static Cell_Definition director_cell;
+static int director_ID = 3;
+// custom cell phenotype function to scale immunostimulatory factor with hypoxia 
+void tumor_cell_phenotype_with_oncoprotein( Cell* pCell, Phenotype& phenotype, double dt ); 
 
-	<microenvironment_setup>
-		<variable name="oxygen" units="mmHg" ID="0">
-			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">100000.00</diffusion_coefficient>
-				<decay_rate units="1/min">.1</decay_rate>  
-			</physical_parameter_set>
-			<initial_condition units="mmHg">250.0</initial_condition><!--Adjustable-->
-			<Dirichlet_boundary_condition units="mmHg" enabled="true">38.0</Dirichlet_boundary_condition>
-		</variable>
+// set the tumor cell properties, then call the function 
+// to set up the tumor cells 
+void create_cell_types( void );
 
-		<!-- Using director signal to mimic nutirent delivery -->
-		<variable name="director signal" units="dimensionless" ID="0">
-			<physical_parameter_set>
-				<diffusion_coefficient units="micron^2/min">1000</diffusion_coefficient>
-				<decay_rate units="1/min">.1</decay_rate> <!-- 1 for cells  --> 
-			</physical_parameter_set>
-			<initial_condition units="dimensionless">0</initial_condition><!--Adjustable-->
-			<Dirichlet_boundary_condition units="dimensionless" enabled="false">1</Dirichlet_boundary_condition>
-		</variable>
-		
-		<options>
-			<!-- Calculating gradients is needed for the nutrient delivery-->
-			<calculate_gradients>true</calculate_gradients>
-			<track_internalized_substrates_in_each_agent>false</track_internalized_substrates_in_each_agent>
-			<!-- not yet supported --> 
-			<initial_condition type="matlab" enabled="false">
-				<filename>./config/initial.mat</filename>
-			</initial_condition>
-			<!-- not yet supported --> 
-			<dirichlet_nodes type="matlab" enabled="false">
-				<filename>./config/dirichlet.mat</filename>
-			</dirichlet_nodes>
-		</options>
-	</microenvironment_setup>		
-	
-	<user_parameters>
-		<!-- using the tumor growth parameters to mimic muscle cells -->
-		<tumor_radius type="double" units="micron">350.0</tumor_radius><!--Adjustable-->
-		<oncoprotein_mean type="double" units="dimensionless">1.0</oncoprotein_mean>
-		<oncoprotein_sd type="double" units="dimensionless">0.25</oncoprotein_sd>
-		<oncoprotein_min type="double" units="dimensionless">0.0</oncoprotein_min>
-		<oncoprotein_max type="double" units="dimensionless">2</oncoprotein_max>
-		<random_seed type="int" units="dimensionless">0</random_seed>
-		<!-- Adding in director signal parameters-->
-		<director_signal_D type="double" units="micron/min^2">1e3</director_signal_D>
-		<director_signal_decay type="double" units="1/min">.1</director_signal_decay> <!-- 100 micron length scale -->
-		<number_of_directors type="int" units="none">1</number_of_directors><!--Adjustable-->
-		<director_color type="string" units="none">limegreen</director_color>	
-	</user_parameters>
-	
-</PhysiCell_settings>
+void setup_tissue(); 
+
+// set up the microenvironment to include the immunostimulatory factor 
+void setup_microenvironment( void );  // done 
+
+std::vector<std::string> heterogeneity_coloring_function( Cell* );
+
+void director_cell_rule( Cell* pCell , Phenotype& phenotype , double dt );  // Adding director cell rule

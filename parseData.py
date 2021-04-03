@@ -29,5 +29,3 @@ for frameNumber in range(170,171):
         if cellPhase == 14:
             pass
             #Cell is alive, Calulate the volume.         
-    
-    

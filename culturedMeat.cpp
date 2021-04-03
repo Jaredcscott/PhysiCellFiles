@@ -82,21 +82,6 @@ void create_cell_types( void )
 	initialize_default_cell_definition();
 	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
 	
-	cell_defaults.functions.volume_update_function = standard_volume_update_function;
-	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
-
-	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
-	cell_defaults.functions.custom_cell_rule = NULL; 
-	
-	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL;  
-	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
-	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
-	
-	/*
-	   This parses the cell definitions in the XML config file. 
-	*/
-	initialize_cell_definitions_from_pugixml(); 
 	// turn the default cycle model to live, 
 	// so it's easier to turn off proliferation
 	
@@ -124,7 +109,7 @@ void create_cell_types( void )
 	static int oxygen_ID = microenvironment.find_density_index( "oxygen" ); // 0
 	
 	//Adding in director signal secretion parameters. 
-	int director_index = microenvironment.find_density_index( "oxygen" ); // 0 
+	int director_index = microenvironment.find_density_index( "director signal" ); // 0 
 	// set uptake and secretion to zero 
 	cell_defaults.phenotype.secretion.secretion_rates[director_index] = 0; 
 	cell_defaults.phenotype.secretion.uptake_rates[director_index] = 0; 
@@ -150,16 +135,6 @@ void create_cell_types( void )
 	// set the default cell type to no phenotype updates 
 	
 	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_oncoprotein; 
-		/* 
-	   Put any modifications to individual cell definitions here. 
-	   
-	   This is a good place to set custom functions. 
-	*/ 
-	
-	cell_defaults.functions.update_phenotype = NULL; 
-	
-
-		
 	
 	cell_defaults.name = "cancer cell"; 
 	cell_defaults.type = 0; 
@@ -194,18 +169,6 @@ void setup_microenvironment( void )
 
 void setup_tissue( void )
 {
-	//double Xmin = microenvironment.mesh.bounding_box[0]; 
-	//double Ymin = microenvironment.mesh.bounding_box[1]; 
-	//double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	//double Xmax = microenvironment.mesh.bounding_box[3]; 
-	//double Ymax = microenvironment.mesh.bounding_box[4]; 
-	//double Zmax = microenvironment.mesh.bounding_box[5];
-	//if( default_microenvironment_options.simulate_2D == true )
-	//{
-	//	Zmin = 0.0; 
-	//	Zmax = 0.0; 
-	//}
 	// place a cluster of tumor cells at the center 
 	int number_of_directors = parameters.ints("number_of_directors"); 
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
@@ -433,4 +396,3 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 	
 	return output; 
 }
-
