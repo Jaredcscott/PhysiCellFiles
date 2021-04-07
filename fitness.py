@@ -1,3 +1,8 @@
+'''
+    To use this, create a folder within the main PhysiCell directorycalled Files 
+    and place this script in that folder. (ie PhysiCell/Files/fitness.py)
+'''
+
 from Parser import Parser
 class Cell:
   def __init__(self, data, variables):
@@ -21,9 +26,8 @@ def fitness(inputArray):
     configFilePath = "./config/PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
     for inputVal in inputArray:
         adjustXMLValue(inputVal)
-
     runSim(inputArray)
-    parser = Parser("./output")                        #Parsing data into a Parser object
+    parser = Parser("../output/")                        #Parsing data into a Parser object
     frameCount = parser.getFrameCount()                #Pulling frame count from data
     masterArray = {}                                   #Master array to store cell objects
     for frameNumber in range(*parser.getFrameRange()): #Looping through frames
@@ -50,5 +54,5 @@ def runSim(input):
 
 def adjustXMLValue(value):
     pass
-    
-fitness([1,2,3]) 
+ 
+print(fitness([1,2,3])) 
