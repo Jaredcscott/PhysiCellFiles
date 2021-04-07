@@ -1,5 +1,5 @@
 '''
-    To use this, create a folder within the main PhysiCell directorycalled Files 
+    To use this, create a folder within the main PhysiCell directory called Files 
     and place this script in that folder. (ie PhysiCell/Files/fitness.py)
 '''
 
@@ -28,24 +28,24 @@ def fitness(inputArray):
         adjustXMLValue(inputVal, configFilePath)
     runSim(inputArray)
     parser = Parser("../output/")                        #Parsing data into a Parser object
-    frameCount = parser.getFrameCount()                #Pulling frame count from data
-    masterArray = {}                                   #Master array to store cell objects
-    for frameNumber in range(*parser.getFrameRange()): #Looping through frames
+    frameCount = parser.getFrameCount()                  #Pulling frame count from data
+    masterTable = {}                                     #Master array to store cell objects
+    for frameNumber in range(*parser.getFrameRange()):   #Looping through frames
         curArray = [] 
-        cells = parser.getFrame(frameNumber).cells     #Pulling cells from parser
+        cells = parser.getFrame(frameNumber).cells       #Pulling cells from parser
         index = 0
-        for i in range(len(cells.data[0])):            #Looping through Cell's
+        for i in range(len(cells.data[0])):              #Looping through Cell's
           curCellData = []                  
-          for dataArray in cells.data:                 #Looping through master Data array aggregating the individual cell's data. 
+          for dataArray in cells.data:                   #Looping through master Data array aggregating the individual cell's data. 
             curCellData.append(dataArray[i])           
-          newCell = Cell(curCellData, cells.variables) #Creating Cell Object
-          masterArray[newCell.getData()[0]] =  newCell
+          newCell = Cell(curCellData, cells.variables)   #Creating Cell Object
+          masterTable[newCell.getData()[0]] =  newCell
 
-    VolumeFromInput = 0                                #Summing healthy biomass within simulation output
-    for cell in masterArray:
-        curData = masterArray[cell].getData()          #Pulling individual cells data
-        if curData[7] == 14:                           #Checking if cell is alive and healthy phase 14
-            VolumeFromInput += curData[4]              #If cell is alive and healthy, add its volume to the current total 
+    VolumeFromInput = 0                                  #Summing healthy biomass within simulation output
+    for cell in masterTable:
+        curData = masterTable[cell].getData()            #Pulling individual cells data
+        if curData[7] == 14:                             #Checking if cell is alive and healthy phase 14
+            VolumeFromInput += curData[4]                #If cell is alive and healthy, add its volume to the current total 
     return VolumeFromInput
 
 
