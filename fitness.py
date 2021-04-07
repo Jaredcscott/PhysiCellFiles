@@ -2,6 +2,7 @@
     To use this, create a folder within the main PhysiCell directory called Files 
     and place this script in that folder. (ie PhysiCell/Files/fitness.py)
 '''
+import xml.etree.ElementTree as ET
 
 from Parser import Parser
 class Cell:
@@ -54,7 +55,10 @@ def runSim(input):
     pass
 
 def adjustXMLValue(value, configFilePath):
-    #TODO: Add logic to adjust xml values within the config file. 
+    root = ET.parse(configFilePath).getroot() #Pulling root of xml tree
+    oxyInit = root.find("microenvironment_setup/variable[@name='oxygen']/initial_condition") #Finding oxygen initial condition
+    print("Oxygen Init: " + str(oxyInit.text))
+
     pass
  
 print(fitness([1,2,3])) 
