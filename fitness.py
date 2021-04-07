@@ -23,9 +23,9 @@ def fitness(inputArray):
         The input will then be fed, one by one, into PhysiCell for simulation. 
         Each set of simulation data will then be 
     '''
-    configFilePath = "./config/PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
+    configFilePath = "../config/PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
     for inputVal in inputArray:
-        adjustXMLValue(inputVal)
+        adjustXMLValue(inputVal, configFilePath)
     runSim(inputArray)
     parser = Parser("../output/")                        #Parsing data into a Parser object
     frameCount = parser.getFrameCount()                #Pulling frame count from data
@@ -50,9 +50,11 @@ def fitness(inputArray):
 
 
 def runSim(input):
+    #Make sys call to run ./cultured-meat or whatever the sim name is. 
     pass
 
-def adjustXMLValue(value):
+def adjustXMLValue(value, configFilePath):
+    #TODO: Add logic to adjust xml values within the config file. 
     pass
  
 print(fitness([1,2,3])) 
