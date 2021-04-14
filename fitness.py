@@ -3,6 +3,7 @@
     and place this script in that folder. (ie PhysiCell/Files/fitness.py)
 '''
 import xml.etree.ElementTree as ET
+import os
 
 from Parser import Parser
 class Cell:
@@ -17,17 +18,17 @@ class Cell:
     return "Cell Id: " + str(self.data[0]) + " Data index values: " + str(self.variables) 
 
 
-def fitness(inputArray):
+def fitness(inputVals):
     '''
         This function takes as input an array where each element is an array contianing 
         input parameters for a PhysiCell .xml config file. 
         The input will then be fed, one by one, into PhysiCell for simulation. 
         Each set of simulation data will then be 
     '''
-    configFilePath = "../config/PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
-    for inputVal in inputArray:
-        adjustXMLValue(inputVal, configFilePath)
-    runSim(inputArray)
+    configFilePath = "../PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
+    #for inputVal in inputArray:
+    #adjustXMLValues(inputVals, configFilePath)
+    runSim(inputVals)
     parser = Parser("../output/")                        #Parsing data into a Parser object
     frameCount = parser.getFrameCount()                  #Pulling frame count from data
     masterTable = {}                                     #Master array to store cell objects
@@ -51,13 +52,16 @@ def fitness(inputArray):
 
 
 def runSim(input):
-    #Make sys call to run ./cultured-meat or whatever the sim name is. 
+    #Make sys call to run ./cultured-meat 
+    os.system("../heterogeneity") 
     pass
 
-def adjustXMLValue(value, configFilePath):
+def adjustXMLValues(value, configFilePath):
     root = ET.parse(configFilePath).getroot() #Pulling root of xml tree
     oxyInit = root.find("microenvironment_setup/variable[@name='oxygen']/initial_condition") #Finding oxygen initial condition
+    tumorRad = root.find("user_parameters/tumor_radius") #Finding oxygen initial condition
     print("Oxygen Init: " + str(oxyInit.text))
+    print("Initial Radius: " + str(tumorRad.text))
 
     pass
  
