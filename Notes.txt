@@ -12,3 +12,12 @@ within the config .xml there are (to me) 4 adjustable values for our agent.
 
 4) number of nutrient delivery cells
 
+Limitations in the simulation
+  -'Muscle cells' are not not realistic
+    -Do not form strands
+    -No endpoint attachment to bone cells. 
+  -'Feeder cells' are not realistic 
+    -Do not link together to form membranes (capilaries) 
+    -Infinite supply of resources
+  -Only a 2d slice
+  
