@@ -73,6 +73,7 @@ using namespace PhysiCell;
 
 static Cell_Definition director_cell;
 static int director_ID = 3;
+static std::string director_color;
 void tumor_cell_phenotype_with_oncoprotein( Cell* pCell, Phenotype& phenotype, double dt ); 
 
 // set the tumor cell properties, then call the function 
