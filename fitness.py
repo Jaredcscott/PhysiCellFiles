@@ -3,6 +3,7 @@
     and place this script in that folder. (ie PhysiCell/Files/fitness.py)
 '''
 import xml.etree.ElementTree as ET
+import pandas as pd
 import os
 
 from Parser import Parser
@@ -25,11 +26,10 @@ def fitness(inputVals):
         The input will then be fed, one by one, into PhysiCell for simulation. 
         Each set of simulation data will then be 
     '''
-    configFilePath = "../PhysiCell_settings.xml"    #Path to the xml config file within PhysiCell
-    #for inputVal in inputArray:
-    #adjustXMLValues(inputVals, configFilePath)
-    runSim(inputVals)
-    parser = Parser("../output/")                        #Parsing data into a Parser object
+    configFilePath = "./config/PhysiCell_settings.xml"   #Path to the xml config file within PhysiCell
+    adjustXMLValues(inputVals, configFilePath)
+    runSim()
+    parser = Parser("./output/")                         #Parsing data into a Parser object
     frameCount = parser.getFrameCount()                  #Pulling frame count from data
     masterTable = {}                                     #Master array to store cell objects
     for frameNumber in range(*parser.getFrameRange()):   #Looping through frames
@@ -51,18 +51,23 @@ def fitness(inputVals):
     return VolumeFromInput
 
 
-def runSim(input):
-    #Make sys call to run ./cultured-meat 
-    os.system("../heterogeneity") 
-    pass
+def runSim():
+    print("-------------Running Simulation-------------")
+    os.system("./cultured_meat") 
+    print("-------------Simulation Finished-------------")
 
-def adjustXMLValues(value, configFilePath):
-    root = ET.parse(configFilePath).getroot() #Pulling root of xml tree
-    oxyInit = root.find("microenvironment_setup/variable[@name='oxygen']/initial_condition") #Finding oxygen initial condition
-    tumorRad = root.find("user_parameters/tumor_radius") #Finding oxygen initial condition
-    print("Oxygen Init: " + str(oxyInit.text))
-    print("Initial Radius: " + str(tumorRad.text))
-
-    pass
+def adjustXMLValues(values, configFilePath):
+    with open(configFilePath,'w+') as f:  # Writing in XML file
+      for line in f.readlines():
+        print(line)
+    #root = ET.parse(configFilePath).getroot() #Pulling root of xml tree
+    #oxyInit = root.find("microenvironment_setup/variable[@name='oxygen']/initial_condition") #Finding oxygen initial condition
+    #tumorRad = root.find("user_parameters/tumor_radius") #
+    #root.set("microenvironment_setup/variable[@name='oxygen']/initial_condition",values[0])
+    #root.set("user_parameters/tumor_radius",values[1])
+    
+    #print("Oxygen Init: ",oxyInit.text))
+    
+    #print(tumorRad.keys())
  
-print(fitness([1,2,3])) 
+print(fitness([20,100])) 
