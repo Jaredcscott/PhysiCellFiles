@@ -20,3 +20,4 @@ for filename in os.listdir(dir_path):
         count += 1
     else:
         continue
+os.system("ffmpeg -f image2 -r 1 -i ./frame%04d.png -vcodec mpeg4 -y ./videos/swissGenevaLake.mp4")

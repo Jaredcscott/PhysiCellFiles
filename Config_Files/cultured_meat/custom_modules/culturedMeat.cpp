@@ -70,104 +70,41 @@
 
 void create_cell_types( void )
 {
-	// use the same random seed so that future experiments have the 
-	// same initial histogram of oncoprotein, even if threading means 
-	// that future division and other events are still not identical 
-	// for all runs 
+	// set the random seed 
+	SeedRandom( parameters.ints("random_seed") );  
 	
-	SeedRandom( parameters.ints( "random_seed" ) ); 
+	/* 
+	   Put any modifications to default cell definition here if you 
+	   want to have "inherited" by other cell types. 
+	   
+	   This is a good place to set default functions. 
+	*/ 
 	
-	// housekeeping 
-	
-	initialize_default_cell_definition();
-	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
-	
-	cell_defaults.functions.volume_update_function = standard_volume_update_function;
-	cell_defaults.functions.update_velocity = standard_update_cell_velocity;
+	initialize_default_cell_definition(); 
 
-	cell_defaults.functions.update_migration_bias = NULL; 
-	cell_defaults.functions.update_phenotype = NULL; // update_cell_and_death_parameters_O2_based; 
-	cell_defaults.functions.custom_cell_rule = NULL; 
-	
-	cell_defaults.functions.add_cell_basement_membrane_interactions = NULL;  
-	cell_defaults.functions.calculate_distance_to_membrane = NULL; 
-	cell_defaults.phenotype.secretion.sync_to_microenvironment( &microenvironment ); 
-	
-	/*
-	   This parses the cell definitions in the XML config file. 
-	*/
-	initialize_cell_definitions_from_pugixml(); 
-	// turn the default cycle model to live, 
-	// so it's easier to turn off proliferation
-	
-	cell_defaults.phenotype.cycle.sync_to_cycle_model( live ); 
-	
-	// Make sure we're ready for 2D
-	
-	cell_defaults.functions.set_orientation = up_orientation;  
-	
-	cell_defaults.phenotype.geometry.polarity = 1.0; 
-	cell_defaults.phenotype.motility.restrict_to_2D = true; 
-	
-	// use default proliferation and death 
-	
-	int cycle_start_index = live.find_phase_index( PhysiCell_constants::live ); 
-	int cycle_end_index = live.find_phase_index( PhysiCell_constants::live ); 
-	
-	int apoptosis_index = cell_defaults.phenotype.death.find_death_model_index( PhysiCell_constants::apoptosis_death_model ); 
-	
 	cell_defaults.parameters.o2_proliferation_saturation = 38.0;  
 	cell_defaults.parameters.o2_reference = 38.0; 
 	
-	// set default uptake and secretion 
+	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_oncoprotein;  
+	cell_defaults.functions.volume_update_function = standard_volume_update_function;
+	cell_defaults.functions.update_velocity = standard_update_cell_velocity;	
 	
-	static int oxygen_ID = microenvironment.find_density_index( "oxygen" ); // 0
+ 	/*
+	   This parses the cell definitions in the XML config file. 
+	*/
 	
-	//Adding in director signal secretion parameters. 
-	int director_index = microenvironment.find_density_index( "oxygen" ); // 0 
-	// set uptake and secretion to zero 
-	cell_defaults.phenotype.secretion.secretion_rates[director_index] = 0; 
-	cell_defaults.phenotype.secretion.uptake_rates[director_index] = 0; 
-	cell_defaults.phenotype.secretion.saturation_densities[director_index] = 1;  
-	// Define "Nutrient Delivery" cells 
-	director_cell = cell_defaults; 
-	director_cell.type = director_ID; 
-	director_cell.name = "director cell"; 
-	// Nutrient Delivery cell secrete the signal 
+	initialize_cell_definitions_from_pugixml(); 
 	
-	director_cell.phenotype.secretion.secretion_rates[director_index] = 9.9; 
-	
-	// Nutrient Delivery cell rule 
-	
-	director_cell.functions.update_phenotype = director_cell_rule; 
-
-	//End of director signal added code. 
-	// oxygen 
-	cell_defaults.phenotype.secretion.secretion_rates[oxygen_ID] = 0; 
-	cell_defaults.phenotype.secretion.uptake_rates[oxygen_ID] = 10; 
-	cell_defaults.phenotype.secretion.saturation_densities[oxygen_ID] = 38;
-
-	// set the default cell type to no phenotype updates 
-	
-	cell_defaults.functions.update_phenotype = tumor_cell_phenotype_with_oncoprotein; 
-		/* 
+	/* 
 	   Put any modifications to individual cell definitions here. 
 	   
 	   This is a good place to set custom functions. 
 	*/ 
 	
-	cell_defaults.functions.update_phenotype = NULL; 
-	
-
+	/*
+	   This builds the map of cell definitions and summarizes the setup. 
+	*/
 		
-	
-	cell_defaults.name = "cancer cell"; 
-	cell_defaults.type = 0; 
-	
-	// add custom data 
-	
-	cell_defaults.custom_data.add_variable( "oncoprotein" , "dimensionless", 1.0 ); 
-	
 	build_cell_definitions_maps(); 
 	display_cell_definitions( std::cout ); 
 	
@@ -234,6 +171,50 @@ void setup_tissue( void )
 
 	double relative_margin = 0.2;  
 	double relative_outer_margin = 0.02;  
+
+		//Start of csv reader
+	std::string filename = "./coords.csv";
+	std::ifstream file( filename, std::ios::in );
+	if( !file )
+	{ 
+		//Checking if the file exists
+		std::cout << "Error: " << filename << " not found during cell loading. Quitting." << std::endl; 
+		exit(-1);
+	}
+	std::string line;
+	while (std::getline(file, line))
+	{
+		//Reading lines 
+		std::vector<double> data;
+		csv_to_vector( line.c_str() , data ); 
+
+		if( data.size() != 4 )
+		{
+			//Type ID is specified in the .xml file under cell definitions
+			std::cout << "Error! Importing cells from a CSV file expects each row to be x,y,z,typeID." << std::endl;  
+			exit(-1);
+		}
+
+		std::vector<double> position = { data[0] , data[1] , data[2] }; //Creating position array with x,y,z, coords from csv
+
+		int my_type = (int) data[3]; 
+		Cell_Definition* pCD = find_cell_definition( my_type ); //Assigning type to cell 
+		if( pCD != NULL )
+		{
+			std::cout << "Creating " << pCD->name << " (type=" << pCD->type << ") at " 
+			<< position << std::endl; 
+			Cell* pCell = create_cell( *pCD ); 
+			pCell->assign_position( position ); //Assigning position to cell
+		}
+		else
+		{
+			std::cout << "Warning! No cell definition found for index " << my_type << "!" << std::endl
+			<< "\tIgnoring cell in " << filename << " at position " << position << std::endl; 
+		}
+
+	}
+	file.close();  //Closing file 
+	//End of csv reader  
 	int n = 0;
 	for( int i=0; i < number_of_directors ; i++ )
 	{
@@ -433,4 +414,6 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 	
 	return output; 
 }
+
+
 
