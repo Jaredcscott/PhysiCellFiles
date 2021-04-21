@@ -19,7 +19,7 @@ class Cell:
     return "Cell Id: " + str(self.data[0]) + " Data index values: " + str(self.variables) 
 
 
-def fitness(inputVals):
+def fitness():
     '''
         This function takes as input an array where each element is an array contianing 
         input parameters for a PhysiCell .xml config file. 
@@ -27,7 +27,6 @@ def fitness(inputVals):
         Each set of simulation data will then be 
     '''
     configFilePath = "./config/PhysiCell_settings.xml"   #Path to the xml config file within PhysiCell
-    adjustXMLValues(inputVals, configFilePath)
     runSim()
     parser = Parser("./output/")                         #Parsing data into a Parser object
     frameCount = parser.getFrameCount()                  #Pulling frame count from data
@@ -55,19 +54,4 @@ def runSim():
     print("-------------Running Simulation-------------")
     os.system("./cultured_meat") 
     print("-------------Simulation Finished-------------")
-
-def adjustXMLValues(values, configFilePath):
-    with open(configFilePath,'w+') as f:  # Writing in XML file
-      for line in f.readlines():
-        print(line)
-    #root = ET.parse(configFilePath).getroot() #Pulling root of xml tree
-    #oxyInit = root.find("microenvironment_setup/variable[@name='oxygen']/initial_condition") #Finding oxygen initial condition
-    #tumorRad = root.find("user_parameters/tumor_radius") #
-    #root.set("microenvironment_setup/variable[@name='oxygen']/initial_condition",values[0])
-    #root.set("user_parameters/tumor_radius",values[1])
-    
-    #print("Oxygen Init: ",oxyInit.text))
-    
-    #print(tumorRad.keys())
  
-print(fitness([20,100])) 
