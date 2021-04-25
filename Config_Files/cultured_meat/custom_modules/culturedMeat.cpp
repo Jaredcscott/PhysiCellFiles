@@ -131,19 +131,7 @@ void setup_microenvironment( void )
 
 void setup_tissue( void )
 {
-	//double Xmin = microenvironment.mesh.bounding_box[0]; 
-	//double Ymin = microenvironment.mesh.bounding_box[1]; 
-	//double Zmin = microenvironment.mesh.bounding_box[2]; 
-
-	//double Xmax = microenvironment.mesh.bounding_box[3]; 
-	//double Ymax = microenvironment.mesh.bounding_box[4]; 
-	//double Zmax = microenvironment.mesh.bounding_box[5];
-	//if( default_microenvironment_options.simulate_2D == true )
-	//{
-	//	Zmin = 0.0; 
-	//	Zmax = 0.0; 
-	//}
-	// place a cluster of tumor cells at the center 
+	//Chooses the number of directors to place. 
 	int number_of_directors = parameters.ints("number_of_directors"); 
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = 0.95 * 2.0 * cell_radius; 
@@ -172,7 +160,7 @@ void setup_tissue( void )
 	double relative_margin = 0.2;  
 	double relative_outer_margin = 0.02;  
 
-		//Start of csv reader
+	//Start of csv reader
 	std::string filename = "./coords.csv";
 	std::ifstream file( filename, std::ios::in );
 	if( !file )
