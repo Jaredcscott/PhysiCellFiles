@@ -24,10 +24,9 @@ from time import time
 #   apply mutation
 #   repeat from "convert" for each generation I would like to produce
 
-# TODO: Remove hard-coding of initial concentration and boundary concentration datapoints so species can have more variables
-# TODO: Adjust selection code from tournament style to the best ones of the batch
-# TODO: Decrease the variability a little bit. Subsequent generations should be converging, not remaining quite as random as they are
 # TODO: Save the final svgs from each generation's best solution to visualize the process of optimizing
+# TODO: Log output from this console
+# TODO: Update the way I'm evaluating the bests so the output is correct. Currently, the generation is not tracked.
 
 # Note: for some reason, physicell takes longer to run these small simulations if I increase the threadcount variable
 # in the PhysiCell setting file. I wonder if I just tell it to use a single thread, and do some multithreading in here
@@ -81,7 +80,7 @@ def fitnessEvaluation(physicellPath):
     """
     with open('logs.txt', 'a') as f:
         with redirect_stdout(f):
-            subprocess.run(physicellPath / 'heterogeneity.exe', cwd=physicellPath, stdout=f)
+            subprocess.run(physicellPath / 'cultured_meat.exe', cwd=physicellPath, stdout=f)
             mcds = pyMCDS('final.xml', physicellPath / 'output')
             return sum(mcds.data['discrete_cells']['total_volume'])
 
@@ -101,8 +100,18 @@ def decode(bounds, n_bits, bitstring):
         chars = ''.join(str(s) for s in substring)
         # convert string to integer
         integer = int(chars, 2)
-        # scale integer to desired range
-        value = bounds[i][0] + (integer/largest) * (bounds[i][1] - bounds[i][0])
+
+        # if it needs to be scaled, scale it
+        if largest != bounds[i][1] or bounds[i][0] != 0:
+            # scale integer to desired range
+            value = bounds[i][0] + (integer/largest) * (bounds[i][1] - bounds[i][0])
+            # if it divided evenly, make it an int
+            if value % 1 < 0.00000001:
+                value = int(value)
+        else:
+            # if the scale is already correct, don't convert the values to floats
+            value = integer
+
         # store
         decoded.append(value)
     return decoded
@@ -172,56 +181,89 @@ def genetic_algorithm(objective, bounds, n_bits, n_iter, n_pop, r_cross, r_mut, 
     outputPath = physicellPath / 'output'
 
     # initial population of random bitstring
+    # pop = [randint(0, 2, n_bits*len(bounds)).tolist() for _ in range(n_pop)]
     pop = [randint(0, 2, n_bits*len(bounds)).tolist() for _ in range(n_pop)]
     print(f'initial random population: {pop[0]}', file=sys.stderr)
 
 
     # I need 2 numbers to throw into settings
-    pairs = [decode(bounds, n_bits, p) for p in pop]
-    print(f"pairs: {pairs}")
+    # pairs = [decode(bounds, n_bits, p) for p in pop]
+    # decoded = [decode(bounds, n_bits, p) for p in pop]
+    # print(f"pairs: {pairs}")
+    # print(f"pairs: {decoded}")
 
-    # Set the first member of the population to the current best
-    settings = readSettings(settingPath)
-    settings['oxygen']['initial_condition'] = pairs[0][0]
-    settings['oxygen']['dirichlet_boundary_condition'] = pairs[0][1]
-    saveXMLsettings(settingPath, settings)
-    bestInputs = [pairs[0][0],pairs[0][1]]
-    best, best_eval = 0, objective(physicellPath)
+    # # Set the first member of the population to the current best
+    # settings = readSettings(settingPath)
+    # settings['oxygen']['initial_condition'] = pairs[0][0]
+    # settings['oxygen']['dirichlet_boundary_condition'] = pairs[0][1]
+    # saveXMLsettings(settingPath, settings)
+    # bestInputs = [pairs[0][0],pairs[0][1]]
+    # best, best_eval = 0, objective(physicellPath)
+
+    best = 0
+    # bestInputs = decoded[0]
+    bestInputs = None
+    best_eval = - 1 * 2**64
 
 
     for generation in range(n_iter):
+        # a generation will run n_pop tests
         print(f"Starting generation {generation}")
-        pairs = [decode(bounds, n_bits, p) for p in pop]
+        # pairs = [decode(bounds, n_bits, p) for p in pop]
+        pop_decoded = [decode(bounds, n_bits, p) for p in pop]
         startTime = time()
 
 
         # Run PhysiCell to evaluate all of the random pairs, updating best and best eval as we go
         i = 0
         generationScores = []
-        for initial,boundary in pairs:
-            # print(f'i: {i}')
-            # print(f"initial: {initial}")
-            # print(f"boundary: {boundary}")
-            settings = readSettings(settingPath)
-            settings['oxygen']['initial_condition'] = initial
-            settings['oxygen']['dirichlet_boundary_condition'] = boundary
 
-            saveXMLsettings(settingPath, settings)
-            # evaluate fitness here
+        # run fitness based off csv
+
+        for index,arrangement in enumerate(pop_decoded):
+            # populate csv
+            with open(physicellPath / 'coords.csv', 'w') as f:
+                coordinates = pop_decoded[index]
+                # for coordinates in pop_decoded:
+                    # separates coordinates into pairs, adds a 0 for the z coordinate, and builds the csv
+                    # [print(str(coordinates[i:i + 2]).strip("[]") + ", 0, 3",file=f) for i in range(index * n_pop, index * n_pop + n_pop, 2)]
+                [print(str(coordinates[i:i + 2]).strip("[]") + ", 0, 3",file=f) for i in range(0,len(coordinates),2)]
+
+            # run fitness function for current arrangement
             current_eval = objective(physicellPath)
             generationScores.append(current_eval)
-            print(f"    {i}: [initial = {initial:>7.4f}, boundary = {boundary:>7.4f}] evaluation = {current_eval:.4f}")
-            if current_eval > best_eval:
-                best = i
-                bestInputs = [initial,boundary]
-                best_eval = current_eval
-                # print(f"New best found: {best_eval} in generation {generation}")
 
-            # best, best_eval = 0, objective(physicellPath)
-            i += 1
+            print(f"    {index}: evaluation = {current_eval:.4f}, coordinates: {[tuple(coordinates[i:i + 2]) for i in range(0, len(coordinates), 2)]}")
+            if current_eval > best_eval:
+                best = index
+                bestInputs = arrangement
+                best_eval = current_eval
+
+        # for initial,boundary in pairs:
+        #     # print(f'i: {i}')
+        #     # print(f"initial: {initial}")
+        #     # print(f"boundary: {boundary}")
+        #     settings = readSettings(settingPath)
+        #     settings['oxygen']['initial_condition'] = initial
+        #     settings['oxygen']['dirichlet_boundary_condition'] = boundary
+        #
+        #     saveXMLsettings(settingPath, settings)
+        #     # evaluate fitness here
+        #     current_eval = objective(physicellPath)
+        #     generationScores.append(current_eval)
+        #     print(f"    {i}: [initial = {initial:>7.4f}, boundary = {boundary:>7.4f}] evaluation = {current_eval:.4f}")
+        #     if current_eval > best_eval:
+        #         best = i
+        #         bestInputs = [initial,boundary]
+        #         best_eval = current_eval
+        #         # print(f"New best found: {best_eval} in generation {generation}")
+        #
+        #     # best, best_eval = 0, objective(physicellPath)
+        #     i += 1
 
         endTime = time()
-        print(f"Generation {generation} computed in {endTime - startTime:.4f} seconds, best = {best}: {pairs[best]}")
+        # print(f"Generation {generation} computed in {endTime - startTime:.4f} seconds, best = {best}: {pairs[best]}")
+        print(f"Generation {generation} computed in {endTime - startTime:.4f} seconds, best = {best}: {pop_decoded[best]}")
         # Select parents in current generation
         # selected = [selection(pop, generationScores) for _ in range(n_pop)]
         bestParents = bestSelection(pop, generationScores, num_parents)
@@ -288,7 +330,7 @@ def genetic_algorithm(objective, bounds, n_bits, n_iter, n_pop, r_cross, r_mut, 
     return [best, best_eval, bestInputs]
 
 
-physicellPath = Path('C:/Users/korle/Documents/0USU/Spring 2021/CS5890 AI and Clean Energy/PhysiCell_V.1.7.1/PhysiCell/')
+physicellPath = Path('C:/Users/korle/Documents/0USU/Spring 2021/CS5890 AI and Clean Energy/PhysiCell_V.1.8.0/PhysiCell/')
 # settingPath = physicellPath / 'config' / 'PhysiCell_settings.xml'
 # outputPath = physicellPath / 'output'
 
@@ -302,18 +344,26 @@ physicellPath = Path('C:/Users/korle/Documents/0USU/Spring 2021/CS5890 AI and Cl
 # saveXMLsettings(settingPath, settings)
 # sub = subprocess.run(physicellPath / 'heterogeneity.exe', cwd=physicellPath)
 
+# number of feeder cells to place
+feeders = 5
+# each feeder will have an x and y coordinate, so the input will be 10 ints long
 
 # define range for input
 # bounds = [[-5.0, 5.0], [-5.0, 5.0]]
 
-bounds = [[0, 100], [0, 100]]
+# bounds = [[0, 100], [0, 100]]
+bounds = []
+for feeder in range(feeders * 2):
+    bounds += [[-256, 256]]
+
+# print(bounds)
 
 # define the total iterations
 # n_iter = 100
-n_iter = 15
+n_iter = 2
 
 # bits per variable
-n_bits = 16
+n_bits = 9
 
 # define the population size
 n_pop = 10
@@ -323,6 +373,24 @@ r_cross = 0.9
 
 # mutation rate
 r_mut = 1.0 / (float(n_bits) * len(bounds))
+
+# print("Testing population:")
+# pop = [randint(0, 2, n_bits*len(bounds)).tolist() for _ in range(n_pop)]
+# print(pop)
+# print(f"len(pop) = {len(pop)}")
+# print("decoding pop:")
+# decoded = [decode(bounds, n_bits, p) for p in pop]
+# print(decoded)
+# print(f"len(decoded) = {len(decoded)}")
+# with open('coords.csv', 'w') as f:
+#     coords = []
+#     for run in decoded:
+#         [print(str(run[i:i + 2]).strip("[]") + ", 0",file=f) for i in range(0, len(run), 2)]
+#         [print(str(run[i:i + 2]).strip("[]") + ", 0") for i in range(0, len(run), 2)]
+#         print("do something...")
+#         # print(coords)
+
+
 
 # perform the genetic algorithm search
 best, score, inputs = genetic_algorithm(fitnessEvaluation, bounds, n_bits, n_iter, n_pop, r_cross, r_mut, physicellPath)
