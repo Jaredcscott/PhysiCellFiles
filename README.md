@@ -7,9 +7,9 @@ The block of text within /Config_Files/makeAddition.txt should be added to /Phys
 
 fitness.py should be placed (together with the class Parser.py) within the main /PhysiCell/ directory. 
 
-Create a file called coords.csv (or use a sample one within the PhysiCellFiles/sample-coords/ folder). 
+Create a file called coords.csv (or use a sample one within the PhysiCellFiles/sample-coords/ folder)
 
-Example File Structure For Running The Sim
+Example file structure for running the sim
 
     .
     |
