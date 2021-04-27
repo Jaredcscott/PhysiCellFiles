@@ -1,8 +1,18 @@
+'''
+ Source: http://www.mathcancer.org/blog/
+ This script will produce a oxygen gas visualization 
+
+ To run this file: 
+ 1) Place it in the same directory as your simulation output. 
+ 2) Adjust the frame number on line 16
+ 3) Run the script within a terminal
+'''
 from pyMCDS import pyMCDS
 import numpy as np
 import matplotlib.pyplot as plt
  
 # load data
+# Adjust the frame number to the desired frame. 
 mcds = pyMCDS('output00000500.xml', './')
  
 # Set our z plane and get our substrate values along it
@@ -12,7 +22,6 @@ plane_oxy = mcds.get_concentrations('oxygen', z_slice=z_val)
 # Get the 2D mesh for contour plotting
 xx = mcds.get_mesh()[0]
 yy = mcds.get_mesh()[1]
-print(len(xx))
  
 # We want to be able to control the number of contour levels so we
 # need to do a little set up
