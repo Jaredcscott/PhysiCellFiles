@@ -1,16 +1,10 @@
 If you refer to PhysiCell_constants.h line 136, 146 - 151 the cell phase can be used to determine if the cell is alive and healthy. 
 we can loop through the cells, look at the phase, if the phase is 14, then we can add its total volume to the sum of viable bio mass. 
 
-Then the agent can compare the total viable biomass and the inputs which generated it against other episodes. 
+The folder Config_Files cultured_meat should be placed within the /PhysiCell/sample-projects folder. 
+The block of text within /Config_Files/makeAddition.txt should be added to /Physicell/sample-projects/Makefile-default
 
-within the config .xml there are (to me) 4 adjustable values for our agent. 
-1) environment oxygen initial condition
-
-2) nutrient package initial condition
-
-3) starting radius (number of starting cells)
-
-4) number of nutrient delivery cells
+fitness.py should be placed (together with the class Parser.py) within the main /PhysiCell/ directory. 
 
 Limitations in the simulation
   -'Muscle cells' are not not realistic
