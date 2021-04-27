@@ -402,6 +402,3 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 	
 	return output; 
 }
-
-
-
