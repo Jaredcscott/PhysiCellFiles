@@ -1,6 +1,6 @@
 # Spiral Pattern Coordinate Generator 
 # For Lab Meat Simulation 
-![Tools](/doubleSpiral.png "")
+![Tools](doubleSpiral.png "")
 
 
 The folder contains:
