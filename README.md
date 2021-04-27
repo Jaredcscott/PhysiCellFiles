@@ -1,4 +1,5 @@
 # Lab Meat/Cell Culture Growth Simulation Optimization 
+![Tools](/sample-coords/coords4.png "")
 
 
 The folder Config_Files cultured_meat should be placed within the /PhysiCell/sample-projects folder. 
