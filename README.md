@@ -18,13 +18,13 @@ Example File Structure For Running The Sim
         |System 
         |Files
         |
-        |output   
-        |Parser.py  <---
-        |fitness.py <---
-        |coords.csv
+        |output     <--- Output location for PhysiCell simulation files
+        |Parser.py  <--- Must be in the same directory as the simulation output folder 
+        |fitness.py <--- Must be together with Parser.py
+        |coords.csv <--- Create or replace with a new file
         |sample-projects
            -.
-            |cultured_meat
-            |Makefile-default
+            |cultured_meat    <--- Copy folder 
+            |Makefile-default <--- Add makeAddition.text content
       
     
