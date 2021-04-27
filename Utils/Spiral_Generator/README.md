@@ -1,5 +1,5 @@
 # Spiral Pattern Coordinate Generator 
-# For Lab Meat Simulation 
+# For Cultured Meat Simulation 
 ![Tools](doubleSpiral.png "")
 
 
