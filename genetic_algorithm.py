@@ -5,8 +5,8 @@ from random import choices, randint, randrange, random
 from fitness import fitness
 
 
-POPULATION_SIZE = 20
-GENERATIONS = 100
+POPULATION_SIZE = 2
+GENERATIONS = 2
 
 
 Genome = List[int]
@@ -32,7 +32,13 @@ def get_genome_cache_key(genome: Genome) -> str:
 
 def fitness_wrapper(genome: Genome, cache: Dict[str, int]) -> int:
     genome_key = get_genome_cache_key(genome)
-    value = fitness([int(genome[:8], 2), int(genome[8:16], 2), int(genome[16:], 2)])
+    print("Paramaters Generated:",args)
+    branchLen = genome[:6][0]*32 + genome[:6][1]*16 + genome[:6][2]*8 + genome[:6][3]*4 + genome[:6][4]*2 + genome[:6][5]*1
+    armLen = genome[6:12][0]*32 + genome[6:12][1]*16 + genome[6:12][2]*8 + genome[6:12][3]*4 + genome[6:12][4]*2 + genome[6:12][5]*1   
+    angle = genome[12:][0]*32 + genome[12:][1]*16 + genome[12:][2]*8 + genome[12:][3]*4 + genome[12:][4]*2 + genome[12:][5]*1
+    args = [branchLen, armLen, angle]
+    print("Paramaters Generated:",args)
+    value = fitness(args)
     cache[genome_key] = value
     return value
 
@@ -93,7 +99,7 @@ def run_evolution(
 def main():
     fitness_cache = {}
     populations, generations = run_evolution(
-        populate_func=partial(generate_population, size=POPULATION_SIZE, genome_length=24),
+        populate_func=partial(generate_population, size=POPULATION_SIZE, genome_length=18),
         fitness_func=lambda genome: fitness_wrapper(genome, fitness_cache)
     )
     print(populations[0])
@@ -101,3 +107,4 @@ def main():
 
 
 main()
+
