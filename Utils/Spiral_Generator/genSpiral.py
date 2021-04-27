@@ -5,6 +5,10 @@
     A graphic representation of the pattern will display after completion. 
 
     The incOffsets dictionary contians some sample offsets which produce interesting results
+
+    To use this script:
+        1) Adjust the parameters as desired. 
+        2) Run genSpiral.py form a terminal
 '''
 from math import asin
 import numpy as np
@@ -15,7 +19,7 @@ xOffset = 0
 yOffset = 0
 # Sample increments which produce interesting results
 incOffsets = {'pi':3.14, 'tau':1.618,'phi':.618,'spiral':25}
-incOffset = incOffsets['tau']         # Adjust this value to alter the angle increment with each cell placed
+incOffset = incOffsets['tau']        # Adjust this value to alter the angle increment with each cell placed
 scale = .1  
 
 def gen_spiral(points,xOffset=0, yOffset=0, incOffset=0, scale=.1):
