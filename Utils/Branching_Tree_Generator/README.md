@@ -1,10 +1,10 @@
-# Spiral Pattern Coordinate Generator 
+# Branching Fractal Pattern Coordinate Generator 
 # For Cultured Meat Simulation 
 ![Tools](doubleBranch.png "")
 
 
 The folder contains:<br>
-    1) genTree.py This file contians a function gen_tree() which will produce tree like branching patterns of cells.<br> 
+    1) genTree.py This file contains a function gen_tree() which will produce tree like branching patterns of cells.<br> 
     2) Examples of coordinate files produced by this generator<br>
     3) Images of the generated patterns <br>
 
