@@ -120,33 +120,26 @@ void setup_microenvironment( void )
 	}
 	// set domain parameters
 	initialize_microenvironment(); 
-	//Adding in director signal env parameters
-	int director_index = microenvironment.find_density_index( "director signal" ); 
-	microenvironment.diffusion_coefficients[director_index] = 
-		parameters.doubles("director_signal_D");  
-	microenvironment.decay_rates[director_index] = 
-		parameters.doubles("director_signal_decay"); 
 	return; 
 }	
 
 void setup_tissue( void )
 {
 	//Chooses the number of directors to place. 
-	int number_of_directors = parameters.ints("number_of_directors"); 
 	double cell_radius = cell_defaults.phenotype.geometry.radius; 
 	double cell_spacing = 0.95 * 2.0 * cell_radius; 
 	
-	double tumor_radius = parameters.doubles( "tumor_radius" );
+	double culture_radius = parameters.doubles( "culture_radius" );
 	
 	// Parameter<double> temp; 
 	
-	int i = parameters.doubles.find_index( "tumor_radius" ); 
+	int i = parameters.doubles.find_index( "culture_radius" ); 
 	
 	Cell* pCell = NULL; 
 
 	
 	double x = 0.0; 
-	double x_outer = tumor_radius; 
+	double x_outer = culture_radius; 
 	double y = 0.0; 
 	
 	double p_mean = parameters.doubles( "oncoprotein_mean" ); 
@@ -161,6 +154,7 @@ void setup_tissue( void )
 	double relative_outer_margin = 0.02;  
 
 	//Start of csv reader
+	int cellCount = 0;
 	std::string filename = "./coords.csv";
 	std::ifstream file( filename, std::ios::in );
 	if( !file )
@@ -192,7 +186,27 @@ void setup_tissue( void )
 			std::cout << "Creating " << pCD->name << " (type=" << pCD->type << ") at " 
 			<< position << std::endl; 
 			Cell* pCell = create_cell( *pCD ); 
+			cellCount++;
+			if (cellCount % 2 == 0) {
+				//Fixing locations of every 3 cells to add rigitity to tree structure
+				pCell->is_movable = false;
+			}
 			pCell->assign_position( position ); //Assigning position to cell
+			int number_of_attachments = pCell->state.number_of_attached_cells(); 
+			std::vector<Cell*> nearby = pCell->nearby_interacting_cells(); 
+			if( number_of_attachments == 0 )
+			{
+				int n = 0; 
+				while( number_of_attachments < (int) pCell->custom_data["max_attachments"] && n < nearby.size() )
+				{
+					if( nearby[n]->state.number_of_attached_cells() < nearby[n]->custom_data["max_attachments"] )
+					{
+						attach_cells( nearby[n] , pCell ); 
+						number_of_attachments++;
+					}
+					n++; 
+				}
+			}
 		}
 		else
 		{
@@ -204,29 +218,16 @@ void setup_tissue( void )
 	file.close();  //Closing file 
 	//End of csv reader  
 	int n = 0;
-	for( int i=0; i < number_of_directors ; i++ )
-	{
-		// pick a random location 
-		position[0] = default_microenvironment_options.X_range[0] + x_range*( relative_margin + (1.0-2*relative_margin)*UniformRandom() ); 
-		
-		position[1] = default_microenvironment_options.Y_range[0] + y_range*( relative_outer_margin + (1.0-2*relative_outer_margin)*UniformRandom() ); 
-		
-		// place the cell
-		Cell* pC;
-		pC = create_cell( director_cell ); 
-		pC->assign_position( position );
-		pC->is_movable = false; 
-	} 
-	while( y < tumor_radius )
+	while( y < culture_radius )
 	{
 		x = 0.0; 
 		if( n % 2 == 1 )
 		{ x = 0.5*cell_spacing; }
-		x_outer = sqrt( tumor_radius*tumor_radius - y*y ); 
+		x_outer = sqrt( culture_radius*culture_radius - y*y ); 
 		
 		while( x < x_outer )
 		{
-			pCell = create_cell(); // tumor cell 
+			pCell = create_cell(); // Default cell 
 			pCell->assign_position( x , y , 0.0 );
 			pCell->custom_data[0] = NormalRandom( p_mean, p_sd );
 			if( pCell->custom_data[0] < p_min )
@@ -236,7 +237,7 @@ void setup_tissue( void )
 			
 			if( fabs( y ) > 0.01 )
 			{
-				pCell = create_cell(); // tumor cell 
+				pCell = create_cell(); // Default cell  
 				pCell->assign_position( x , -y , 0.0 );
 				pCell->custom_data[0] = NormalRandom( p_mean, p_sd );
 				if( pCell->custom_data[0] < p_min )
@@ -247,7 +248,7 @@ void setup_tissue( void )
 			
 			if( fabs( x ) > 0.01 )
 			{ 
-				pCell = create_cell(); // tumor cell 
+				pCell = create_cell(); // Default cell 
 				pCell->assign_position( -x , y , 0.0 );
 				pCell->custom_data[0] = NormalRandom( p_mean, p_sd );
 				if( pCell->custom_data[0] < p_min )
@@ -257,7 +258,7 @@ void setup_tissue( void )
 		
 				if( fabs( y ) > 0.01 )
 				{
-					pCell = create_cell(); // tumor cell 
+					pCell = create_cell(); // Default cell 
 					pCell->assign_position( -x , -y , 0.0 );
 					pCell->custom_data[0] = NormalRandom( p_mean, p_sd );
 					if( pCell->custom_data[0] < p_min )
@@ -287,7 +288,7 @@ void setup_tissue( void )
 		{ max = r; }
 	}
 	double mean = sum / ( all_cells->size() + 1e-15 ); 
-	// compute standard deviation 
+	// Compute standard deviation 
 	sum = 0.0; 
 	for( int i=0; i < all_cells->size(); i++ )
 	{
@@ -304,39 +305,17 @@ void setup_tissue( void )
 	return; 
 }
 
-//Adding in director cell rule
-void director_cell_rule( Cell* pCell , Phenotype& phenotype , double dt )
-{
-	return; 
-	std::vector<Cell*> nearby = pCell->cells_in_my_container(); 
-	
-	// if at least 2 neighbors, turn off secretion 
-		// if size >= 3, then we have "self" and at least two more 
-	if( nearby.size() > 2 )
-	{
-		pCell->phenotype.secretion.set_all_secretion_to_zero(); 
-		pCell->custom_data[ "secreting" ] = 0.0; 
-		
-		pCell->functions.update_phenotype = NULL; 
-	}
-	
-	return; 
-}
-
-// custom cell phenotype function to scale immunostimulatory factor with hypoxia 
+// Tumor cell from heterogeneity sample project
 void tumor_cell_phenotype_with_oncoprotein( Cell* pCell, Phenotype& phenotype, double dt )
 {
 	update_cell_and_death_parameters_O2_based(pCell,phenotype,dt);
-	
-	// if cell is dead, don't bother with future phenotype changes. 
+	// If cell is dead, don't bother with future phenotype changes. 
 	if( phenotype.death.dead == true )
 	{
 		pCell->functions.update_phenotype = NULL; 		
 		return; 
 	}
-
-	// multiply proliferation rate by the oncoprotein 
-	
+	// Multiply proliferation rate by the oncoprotein 
 	static int cycle_start_index = live.find_phase_index( PhysiCell_constants::live ); 
 	static int cycle_end_index = live.find_phase_index( PhysiCell_constants::live ); 
 	static int oncoprotein_i = pCell->custom_data.find_variable_index( "oncoprotein" ); 
@@ -346,19 +325,19 @@ void tumor_cell_phenotype_with_oncoprotein( Cell* pCell, Phenotype& phenotype, d
 	return; 
 }
 
-std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
+std::vector<std::string> meat_coloring_function( Cell* pCell )
 {
 	static int oncoprotein_i = pCell->custom_data.find_variable_index( "oncoprotein" ); 
-	static std::string director_color = parameters.strings( "director_color" ); 
+	static std::string feeder_color = parameters.strings( "feeder_color" ); 
 	
 	static double p_min = parameters.doubles( "oncoprotein_min" ); 
 	static double p_max = parameters.doubles( "oncoprotein_max" ); 
 	
-	// immune are black
+	// Immune are black
 	std::string color = "black";
 	std::vector< std::string > output( 4, "black" ); 
 	if( pCell->type == director_ID )
-	{ color = director_color; 
+	{ color = feeder_color; 
 		output[0] = color; 
 		output[2] = color; 
 	
@@ -368,7 +347,7 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 	if( pCell->type == 1 )
 	{ return output; } 
 	
-	// live cells are green, but shaded by oncoprotein value 
+	// Live cells are green, but shaded by oncoprotein value 
 	if( pCell->phenotype.death.dead == false )
 	{
 		int oncoprotein = (int) round( (1.0/(p_max-p_min)) * (pCell->custom_data[oncoprotein_i]-p_min) * 255.0 ); 
@@ -383,7 +362,7 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 		return output; 
 	}
 
-	// if not, dead colors 
+	// If not, dead colors 
 	
 	if (pCell->phenotype.cycle.current_phase().code == PhysiCell_constants::apoptotic )  // Apoptotic - Red
 	{
@@ -402,3 +381,42 @@ std::vector<std::string> heterogeneity_coloring_function( Cell* pCell )
 	
 	return output; 
 }
+
+void feeder_cell_motility( Cell* pCell, Phenotype& phenotype, double dt )
+{
+	static int nSignal = microenvironment.find_density_index("signal");
+	
+	// look for cells to form attachments, if 0 attachments
+	int number_of_attachments = pCell->state.number_of_attached_cells(); 
+	std::vector<Cell*> nearby = pCell->nearby_interacting_cells();  
+	if( number_of_attachments == 0 )
+	{
+		int n = 0; 
+		while( number_of_attachments < (int) pCell->custom_data["max_attachments"] && n < nearby.size() )
+		{
+			if( nearby[n]->state.number_of_attached_cells() < nearby[n]->custom_data["max_attachments"] )
+			{
+				attach_cells( nearby[n] , pCell ); 
+				number_of_attachments++;
+			}
+			n++; 
+		}
+	}
+
+	// if no attachments, use chemotaxis 
+	if( number_of_attachments <=3  )
+	{ 
+		phenotype.motility.migration_bias_direction = pCell->nearest_gradient(nSignal);	
+		normalize( &( phenotype.motility.migration_bias_direction ) );
+	} 
+	else
+	{
+		//Stop moving, and stop attaching. 
+		phenotype.motility.is_motile = false; 
+		pCell->functions.update_migration_bias = NULL;
+
+	} 
+	
+	return; 
+}
+

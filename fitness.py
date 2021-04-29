@@ -8,65 +8,12 @@ import os
 import turtle
 
 from Parser import Parser
+from genTree import gen_tree
+from genSpiral import gen_spiral
 
 import math
 CUR_SIM = 0
 volumes=[]
-
-class UndrawnTurtle():
-    def __init__(self):
-        self.x, self.y, self.angle = 0.0, 0.0, 0.0
-        self.pointsVisited = []
-        self._visit()
-
-    def position(self):
-        return self.x, self.y
-
-    def goto(self,x,y):
-        self.x = x 
-        self.y = y
-        self._visit()
-
-    def xcor(self):
-        return self.x
-
-    def ycor(self):
-        return self.y
-
-    def forward(self, distance):
-        angle_radians = math.radians(self.angle)
-
-        self.x += math.cos(angle_radians) * distance
-        self.y += math.sin(angle_radians) * distance
-
-        self._visit()
-
-    def backward(self, distance):
-        self.forward(-distance)
-
-    def right(self, angle):
-        self.angle -= angle
-
-    def left(self, angle):
-        self.angle += angle
-
-    def setpos(self, x, y = None):
-        """Can be passed either a tuple or two numbers."""
-        if y == None:
-            self.x = x[0]
-            self.y = y[1]
-        else:
-            self.x = x
-            self.y = y
-        self._visit()
-
-    def _visit(self):
-        """Add point to the list of points gone to by the turtle."""
-        self.pointsVisited.append(self.position())
-        
-    def setheading(self,angle):
-      """Add point to the list of points gone to by the turtle."""
-      self.angle = angle
 
 class Cell:
   def __init__(self, data, variables):
@@ -124,38 +71,3 @@ def runSim():
     os.system("./cultured_meat") 
     print("-------------Simulation Finished-------------")
  
-def build_tree(file, t, branch_length, shorten_by, angle):
-  if branch_length > MINIMUM_BRANCH_LENGTH:
-    t.forward(branch_length/4)
-    file.write(str(int(t.xcor())*1.5)+','+str(int(t.ycor())* 1.5) + ',0,3\n')
-    t.forward(branch_length/2)
-    file.write(str(int(t.xcor())*1.5)+','+str(int(t.ycor())* 1.5) + ',0,3\n')
-    t.forward(branch_length/4)
-    new_length = branch_length - shorten_by    
-    t.left(angle)
-    build_tree(file, t, new_length, shorten_by, angle)  
-    t.right(angle * 2)
-    build_tree(file, t, new_length, shorten_by, angle)    
-    t.left(angle)
-    file.write(str(int(t.xcor())*1.5)+','+str(int(t.ycor())* 1.5) + ',0,3\n')
-    #build_tree(file, t, new_length, shorten_by, angle) # Adds a third branch 
-    t.backward(branch_length)
-
-def gen_tree(branchLen,armLen,angle):
-    xs = []                          # Stores the x values for a graphic representation
-    ys = []                          # Stores the y values for a graphic representation
-    file = open("./coords.csv",'w')
-    file.truncate(0)
-    tree = UndrawnTurtle()
-    tree.setheading(90)
-    build_tree(file, tree, branchLen,armLen,angle)
-    tree.goto(0,0)
-    tree.setheading(180)
-    build_tree(file, tree, branchLen,armLen,angle)
-    tree.goto(0,0)
-    tree.setheading(270)
-    build_tree(file, tree, branchLen,armLen,angle)
-    tree.goto(0,0)
-    tree.setheading(0)
-    build_tree(file, tree, branchLen,armLen,angle)
-    file.close()

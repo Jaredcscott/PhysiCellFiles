@@ -85,6 +85,5 @@ void setup_tissue( void );
 // set up the microenvironment to include the immunostimulatory factor 
 void setup_microenvironment( void );  // done 
 
-std::vector<std::string> heterogeneity_coloring_function( Cell* );
-
-void director_cell_rule( Cell* pCell , Phenotype& phenotype , double dt );  // Adding director cell rule
+std::vector<std::string> meat_coloring_function( Cell* );
+void feeder_cell_motility( Cell* pCell, Phenotype& phenotype, double dt ); 
