@@ -16,3 +16,4 @@ PhysiCell
     |fitness.py       <--- Must be together with Parser.py
     |coords.csv       <--- Create or replace with a new file
     |sample-projects
+
