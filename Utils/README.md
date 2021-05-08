@@ -1,7 +1,7 @@
 # Use the pattern generators here to create biologically similar cell structures. 
 
 # Example File Structure 
-
+Place a  <generator file>.py file within the main PhysiCell directory (OR where you wuld like your coords.csv file)
 .
 |
 PhysiCell
