@@ -29,3 +29,4 @@ Example file structure for running the sim
             |Makefile-default <--- Add makeAddition.text content
       
     
+PhysiCell Simulation Platform: http://physicell.org/
