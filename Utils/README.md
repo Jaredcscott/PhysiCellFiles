@@ -17,3 +17,4 @@ PhysiCell
     |coords.csv       <--- Create or replace with a new file
     |sample-projects
 
+If `coords.csv` does not exists it will be created. 
