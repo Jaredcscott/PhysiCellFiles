@@ -1,4 +1,5 @@
 '''
+    This is a fitness algorithm to determine how wella specific configuration of feeder cells grows the cell culture
     To use this, place the file within the main PhysiCell directory 
     (ie PhysiCell/fitness.py)
 '''
